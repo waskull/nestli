@@ -41,5 +41,5 @@ export class Sale{
 	
 	@ManyToOne(type => User, (user) => user.sales, { cascade:true, onUpdate: 'CASCADE', onDelete: 'SET NULL' })
     @JoinColumn({name: "user"})
-    user: number;
+    user: User;
 }
