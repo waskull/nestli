@@ -74,10 +74,9 @@ export class SaleController {
 		sale.paymentMethod = dto.paymentMethod;
 		if(dto.paymentMethod !== Method.Cash) sale.pay_code = dto.pay_code
 		sale.status = statusEnum.INCOMPLETE;
-		sale.total = 0.0
-		sale.user = dto?.user;
-		if(dto?.user===undefined) {sale.user = user.id;}
-
+		sale.total = 0.0;
+		sale.user = await this.userService.getOneById(dto?.user);
+		if(dto?.user===undefined) {sale.user = user;}
 		sale.address = dto.address;
         if (!sale.user) throw new NotFoundException('Usuario Invalido');
         const items = await this.itemService.getByIds(dto.items.map(a => a.id));
