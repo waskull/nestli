@@ -36,7 +36,7 @@ export class SaleService {
     async getIncompletes(client_id: number): Promise<Sale[]> {
         const sale = await this.saleRepository.find({
             relations: ['sale_items', 'sale_items.item'], where: {
-                user: client_id
+                user: {id:client_id}
 
             },
             order: { createdAt: "DESC" }
@@ -107,7 +107,7 @@ export class SaleService {
     async create(sale: Sale, newItems: SaleItems[]) {
 
         const newSale = this.saleRepository.create({
-            user: sale.user,
+            user: {id:sale.user.id},
             status: sale.status,
             paymentMethod: sale.paymentMethod,
             pay_code: sale.pay_code,
