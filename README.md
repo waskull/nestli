@@ -13,6 +13,6 @@
 
 ## Descripción
 
-Aplicacion de lado del servidor para la app CALI
+Aplicacion de lado del servidor para la app CALI, desarrollada usand las tecnologias NestJS y TypeORM.
 
 Iniciar con el comando: nest start
