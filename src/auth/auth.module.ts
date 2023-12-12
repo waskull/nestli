@@ -7,7 +7,6 @@ import { AuthService } from './auth.service';
 import { LocalStrategy, JwtStrategy } from './strategies/';
 import { JWT_KEY } from '../config/constants';
 import {ConfigService} from '@nestjs/config';
-import { UserService } from '../user/user.service';
 
 
 @Module({
@@ -18,7 +17,7 @@ import { UserService } from '../user/user.service';
       inject: [ConfigService],
       useFactory:(config: ConfigService) =>({
       secret: config.get<string>(JWT_KEY),
-      signOptions: { expiresIn:'3d'} //240
+      signOptions: { expiresIn:'7d'} //240
       })
     }),
     UserModule],

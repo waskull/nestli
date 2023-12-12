@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_PORT, DATABASE_USERNAME }from './config/constants';
+import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_PORT, DATABASE_USERNAME } from './config/constants';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { AuthModule } from './auth/auth.module';
@@ -21,57 +21,47 @@ import { MailerModule } from '@nestjs-modules/mailer';
 @Module({
   imports: [
     ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: '.env'
-  }),
-  ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', '/public/'),
-    serveStaticOptions: {
-      index:false,
-    }
-  }),
-  MailerModule.forRoot({
-    transport: {
-      service:'gmail',
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth:{
-        user: 'forrosauto@gmail.com',
-        pass: 'autofdb00'
-      },
-      tls: {
-        secureProtocol: "TLSv1_2_method",
-        rejectUnauthorized: false
+      isGlobal: true,
+      envFilePath: '.env'
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '/public/'),
+      serveStaticOptions: {
+        index: false,
       }
-    },
-  }),
-  TypeOrmModule.forRootAsync({
-    inject:[ConfigService],
-    useFactory: (config: ConfigService) => ({
-      type: 'mysql',
-      host: config.get<string>(DATABASE_HOST),
-      port: parseInt(config.get<string>(DATABASE_PORT), 10),
-      username: config.get<string>(DATABASE_USERNAME),
-      password: config.get<string>(DATABASE_PASSWORD),
-      database: config.get<string>(DATABASE_NAME),
-      entities: [__dirname+ './**/**/*entity{.ts,.js}'],
-      autoLoadEntities: true,
-      synchronize: true,
-      logging: true,
-      logger: 'file'
-    })
-  }),
-  AuthModule,
-  AccessControlModule.forRoles(roles),
-  UserModule,
-  ProviderModule,
-  ItemModule, 
-  InventoryModule, 
-  OrderModule, 
-  SaleModule,
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: "localhost",
+        port: 1025,
+      },
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: config.get<string>(DATABASE_HOST),
+        port: parseInt(config.get<string>(DATABASE_PORT), 10),
+        username: config.get<string>(DATABASE_USERNAME),
+        password: config.get<string>(DATABASE_PASSWORD),
+        database: config.get<string>(DATABASE_NAME),
+        entities: [__dirname + './**/**/*entity{.ts,.js}'],
+        autoLoadEntities: true,
+        synchronize: true,
+        logging: true,
+        logger: 'file'
+      })
+    }),
+    AuthModule,
+    AccessControlModule.forRoles(roles),
+    UserModule,
+    ProviderModule,
+    ItemModule,
+    InventoryModule,
+    OrderModule,
+    SaleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

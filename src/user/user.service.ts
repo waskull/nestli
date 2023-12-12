@@ -48,6 +48,9 @@ export class UserService {
     async findByEmail(data:UserFindOne){
         return await this.userRepository.createQueryBuilder('user').where({email:data.email}).addSelect('user.password').getOne();
     }
+    async getByEmail(data:UserFindOne){
+        return await this.userRepository.createQueryBuilder('user').where({email:data.email}).addSelect('user.firstname', 'user.lastname').getOne();
+    }
     async getCount(): Promise<number>{
         const T:User[] = await this.userRepository.find({where:{
             roles: "cliente"

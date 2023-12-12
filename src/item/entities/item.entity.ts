@@ -10,6 +10,9 @@ export class Item{
 
     @Column({type: 'varchar', length: 200, nullable: false})
     name:string;
+
+    @Column({type: 'varchar', length: 255, nullable: true, default:"Un delicioso helado"})
+    desc:string;
 	
 	@Column({type: 'varchar', length: 255, nullable: true})
     image:string;
@@ -20,8 +23,11 @@ export class Item{
     @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", onUpdate: "CURRENT_TIMESTAMP(6)" })
     updateAt?: Date;
 
-    @Column({type: 'decimal', default:0, nullable: false})
+    @Column({type: 'decimal',precision:11, scale:2, default:0.20, nullable: false})
     price:number;
+
+    @Column({type: 'decimal',precision:11, scale:2, default:0.10, nullable: false})
+    wholesale_price:number;
 
     @OneToOne(() => Inventory)
     inventory: Inventory;

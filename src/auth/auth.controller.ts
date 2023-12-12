@@ -5,6 +5,7 @@ import { User as UserEntity } from '../user/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { LocalAuthGuard } from './guards/';
+import { ResetDTO } from './dtos/reset.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,11 +20,6 @@ export class AuthController {
     ){
         const data = await this.authService.login(user);
         const {accessToken, ...rest} = data;
-        // res.cookie("auth-cookie", data.accessToken, {
-        //     maxAge: 2 * 60 * 60 * 1000, 
-        //     httpOnly:true, secure:false, 
-        //     sameSite: 'Strict'
-        // });
         return { message:'Login Exitoso', data: data }
     }
 
@@ -57,13 +53,13 @@ export class AuthController {
 
     @Auth()
     @Post('/resetpassword')
-    async send(@Body() ResetDTO, @Res({ passthrough: true }) res){
-        console.log("Email", ResetDTO.email);
+    async send(@Body() ResetDTO: ResetDTO, @Res({ passthrough: true }) res){
         const result = await this.authService.checkEmail(ResetDTO.email);
-        console.log("Result", result);
         if (!result) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `Este correo no existe` }); }
         else{
-            await this.authService.sendMail("mrtncsto@gmail.com","asdgfgafdg","Martinn","Castillo");
+            const newPassword = Math.random().toString(36).substring(2,10);
+            await this.authService.sendMail(ResetDTO.email,newPassword,result.firstname, result.lastname);
+            return res.status(HttpStatus.OK).json({ message:`Una nueva clave fue enviada a tu correo electronico`});
         }
     }
 }

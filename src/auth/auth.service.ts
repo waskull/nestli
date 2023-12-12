@@ -33,7 +33,7 @@ export class AuthService {
     }
 
     async checkEmail(email:string): Promise<any>{
-        return await this.userService.findByEmail({email});
+        return await this.userService.getByEmail({email});
     }
     
 
@@ -41,9 +41,9 @@ export class AuthService {
         const html = `
         <h1>CALI APP</h1>
         <ul>
-            <li>Hola ${firstname+" "+lastname}</li>
+            <li>Hola ${firstname} ${lastname}</li>
         </ul>
-        <p>${"Tu nueva clave es : "+newPassword+""}</p>
+        <p>${"Tu nueva clave es : "+newPassword}</p>
         <br>
         <p>Recuerda que puedes cambiar esta clave desde nuestra app. </p>
         <br>
@@ -51,7 +51,7 @@ export class AuthService {
     `;
         this.mailerService.sendMail({
             to: email,
-            from: 'forrosauto@gmail.com',
+            from: 'cali@gmail.com',
             subject: 'Reinicio de clave',
             text:'D:',
             html: html

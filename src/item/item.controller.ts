@@ -52,22 +52,27 @@ export class ItemController {
     @UseInterceptors(FileInterceptor('image', multerOptions))
     async imagen(@Body() dataform, @UploadedFile() file: Express.Multer.File, @Res({ passthrough: true }) res) {
         if (!dataform?.name || dataform?.name.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un nombre con al menos 2 caracteres` });
+        if (!dataform?.desc || dataform?.desc.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer una descripción con al menos 2 caracteres` });
         if (!dataform?.price || parseFloat(dataform?.price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio mayor a 0` });
+        if (!dataform?.wholesale_price || parseFloat(dataform?.wholesale_price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio al mayor que sea mayor a 0` });
+        if (parseFloat(dataform?.wholesale_price) > parseFloat(dataform?.price)) return res.status(HttpStatus.BAD_REQUEST).json({ message: `El precio al mayor no puede ser superior al precio al detal` });
         const itemDto: CreateItemDto = {
             name: dataform?.name,
             price: parseFloat(dataform?.price),
-            image: `/images/${file?.filename}`
+            image: `/images/${file?.filename}`,
+            desc: dataform?.desc,
+            wholesale_price: dataform?.wholesale_price
         }
 
         if (!itemDto.image) itemDto.image = "item_default.png";
 
-		await this.itemService.findOneByName(dataform.name);
-		return await this.itemService.create(itemDto);
+        await this.itemService.findOneByName(dataform.name);
+        return await this.itemService.create(itemDto);
     }
     @Auth()
     @Post('normal')
     async create(@Body() dto: CreateItemDto) {
-		console.log(dto);
+        console.log(dto);
         await this.itemService.findOneByName(dto.name);
         return await this.itemService.create(dto);
     }
@@ -80,24 +85,31 @@ export class ItemController {
         }
     )
     @Patch(':id')
-	@UseInterceptors(FileInterceptor('image', multerOptions))
+    @UseInterceptors(FileInterceptor('image', multerOptions))
     async edit(
         @Param('id', ParseIntPipe) id: number,
         @Body() dataform,
         @UploadedFile() file: Express.Multer.File,
         @Res({ passthrough: true }) res) {
         if (!dataform?.name || dataform?.name.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un nombre con al menos 2 caracteres` });
+        if (!dataform?.desc || dataform?.desc.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer una descripción con al menos 2 caracteres` });
         if (!dataform?.price || parseFloat(dataform?.price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio mayor a 0` });
+        if (!dataform?.wholesale_price || parseFloat(dataform?.wholesale_price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio al mayor que sea mayor a 0` });
+        if (parseFloat(dataform?.wholesale_price) > parseFloat(dataform?.price)) return res.status(HttpStatus.BAD_REQUEST).json({ message: `El precio al mayor no puede ser superior al precio al detal` });
         const itemDto: CreateItemDto = {
             name: dataform?.name,
             price: parseFloat(dataform?.price),
-            image: `/images/${file?.filename}`
+            image: `/images/${file?.filename}`,
+            desc: dataform?.desc,
+            wholesale_price: dataform?.wholesale_price
         }
 
         if (!itemDto.image) itemDto.image = "item_default.png";
-		await this.itemService.edit(id, itemDto);
 
-        
+        await this.itemService.findOneByName(dataform.name);
+        await this.itemService.edit(id, itemDto);
+
+
     }
 
     @Auth({

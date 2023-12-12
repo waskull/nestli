@@ -7,8 +7,16 @@ export class CreateItemDto {
     name: string;
 
     @IsNumber()
-    @Min(0, { message: 'Precio debe de ser mayor a 2' })
+    @Min(0.1, { message: 'Precio debe de ser al menos 0.2' })
     price: number;
+
+    @IsNumber()
+    @Min(0, { message: 'Precio al mayor debe de ser al menos 0.1' })
+    wholesale_price: number;
+
+    @IsString({ message: 'La descripción de la imagen debe de ser una cadena de caracteres' })
+    @MinLength(3, { message: 'La descripción debe de tener mas de 2 caracteres' })
+    desc: string;
 
     @IsOptional()
     @IsString({ message: 'El nombre de la imagen debe de ser una cadena de caracteres' })

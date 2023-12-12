@@ -23,7 +23,7 @@ export class InventoryService {
 		inventory.forEach(object => {
 		  let lowstock = false;
 		  if(object.stock < 20) lowstock = true
-		  newInventory.push({name: object.item.name,image:object.item.image,  price: object.item.price, id: object.item.id, lowstock: lowstock});
+		  newInventory.push({name: object.item.name,image:object.item.image,  price: object.item.price,wholesale_price:object.item.wholesale_price, id: object.item.id, lowstock: lowstock, desc: object.item.desc});
 		  
 		});
 		return newInventory;
