@@ -32,7 +32,7 @@ export class Sale{
     @Column({type: 'simple-array', nullable: true})
     pay_code: string[];
 
-    @Column({type:'decimal', nullable:false})
+    @Column({type:'decimal',precision:11, scale:2, nullable:false})
     total: number;
 	
 	@ManyToOne(type => User, (user) => user.delivery_man, { cascade:true, onUpdate: 'CASCADE', onDelete: 'SET NULL' })

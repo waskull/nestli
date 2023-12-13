@@ -90,11 +90,27 @@ export class SaleController {
                 id: 0
             };
         });
+		var subtotal:number = 0.0;
 		for (var i = 0; i < saleItems.length; i++) {
 			const inventory = await this.inventoryService.getOneByItem(saleItems[i].item.id);
-            sale.total += (saleItems[i].quantity*parseFloat(inventory.item.price.toString()));
+			subtotal += (saleItems[i].quantity*parseFloat(inventory.item.price.toString()));
 		}
-        return await this.saleService.create(sale, saleItems);
+		for (var i = 0; i < saleItems.length; i++) {
+			const inventory = await this.inventoryService.getOneByItem(saleItems[i].item.id);
+			console.log(i,"qty: ", saleItems[i].quantity, "price: ", saleItems[i].item.price, "whole: ",saleItems[i].item.wholesale_price);
+			if(subtotal>=10){
+				sale.total += (saleItems[i].quantity*parseFloat(inventory.item.wholesale_price.toString()));
+			}
+			else{
+				sale.total += (saleItems[i].quantity*parseFloat(inventory.item.price.toString()));
+			}
+            
+		}
+		console.log("sub",sale.total);
+		if(sale.total<20) sale.total+=4
+		else if(sale.total>=20 && sale.total<30) sale.total+=2
+		console.log("total",sale.total);
+		return await this.saleService.create(sale, saleItems);
     }
 
     @Auth(
@@ -109,7 +125,7 @@ export class SaleController {
     async confirm(@Body() dto: editSaleDto, @Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
         const sale = await this.saleService.getOne(id);
         if (sale.status !== statusEnum.INCOMPLETE) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `El pedido seleccionado ya ha sido procesado` }); }
-        /*
+        
 
         sale.sale_items.forEach(async element => {
             let inventory = new Inventory();
@@ -117,7 +133,7 @@ export class SaleController {
             if (inventory.stock < element.quantity) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `No hay suficiente stock para el producto: ${inventory.item.name}` }) }
             inventory.stock -= element.quantity;
             this.inventoryService.reduceInventory(inventory);
-        });*/
+        });
         await this.saleService.confirmSale(id, dto.delivery_man_id);
         return { message: "Pedido aprobado y listo para ser entregado" }
     }

@@ -51,17 +51,18 @@ export class ItemController {
     @Post()
     @UseInterceptors(FileInterceptor('image', multerOptions))
     async imagen(@Body() dataform, @UploadedFile() file: Express.Multer.File, @Res({ passthrough: true }) res) {
+
         if (!dataform?.name || dataform?.name.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un nombre con al menos 2 caracteres` });
         if (!dataform?.desc || dataform?.desc.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer una descripción con al menos 2 caracteres` });
-        if (!dataform?.price || parseFloat(dataform?.price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio mayor a 0` });
-        if (!dataform?.wholesale_price || parseFloat(dataform?.wholesale_price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio al mayor que sea mayor a 0` });
+        if (!dataform?.price || parseFloat(dataform?.price) <= 0.0) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio detal de al menos 0.1` });
+        if (!dataform?.wholesale_price || parseFloat(dataform?.wholesale_price) <= 0.0) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio al mayor que sea mayor a 0.1` });
         if (parseFloat(dataform?.wholesale_price) > parseFloat(dataform?.price)) return res.status(HttpStatus.BAD_REQUEST).json({ message: `El precio al mayor no puede ser superior al precio al detal` });
         const itemDto: CreateItemDto = {
             name: dataform?.name,
             price: parseFloat(dataform?.price),
             image: `/images/${file?.filename}`,
             desc: dataform?.desc,
-            wholesale_price: dataform?.wholesale_price
+            wholesale_price: parseFloat(dataform?.wholesale_price)
         }
 
         if (!itemDto.image) itemDto.image = "item_default.png";
@@ -93,15 +94,15 @@ export class ItemController {
         @Res({ passthrough: true }) res) {
         if (!dataform?.name || dataform?.name.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un nombre con al menos 2 caracteres` });
         if (!dataform?.desc || dataform?.desc.length < 2) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer una descripción con al menos 2 caracteres` });
-        if (!dataform?.price || parseFloat(dataform?.price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio mayor a 0` });
-        if (!dataform?.wholesale_price || parseFloat(dataform?.wholesale_price) < 1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio al mayor que sea mayor a 0` });
+        if (!dataform?.price || parseFloat(dataform?.price) < 0.1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio detal de al menos 0.1` });
+        if (!dataform?.wholesale_price || parseFloat(dataform?.wholesale_price) < 0.1) return res.status(HttpStatus.BAD_REQUEST).json({ message: `Debes proveer un precio al mayor que sea mayor a 0.1` });
         if (parseFloat(dataform?.wholesale_price) > parseFloat(dataform?.price)) return res.status(HttpStatus.BAD_REQUEST).json({ message: `El precio al mayor no puede ser superior al precio al detal` });
         const itemDto: CreateItemDto = {
             name: dataform?.name,
             price: parseFloat(dataform?.price),
             image: `/images/${file?.filename}`,
             desc: dataform?.desc,
-            wholesale_price: dataform?.wholesale_price
+            wholesale_price: parseFloat(dataform?.wholesale_price)
         }
 
         if (!itemDto.image) itemDto.image = "item_default.png";
