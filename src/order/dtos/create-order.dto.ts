@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsNumber, Min, IsNotEmpty, IsArray, ValidateNested, ArrayMinSize } from "class-validator";
+import { IsNumber, Min, IsNotEmpty, IsArray, ValidateNested, ArrayMinSize, IsDateString } from "class-validator";
 import { CreateInventoryDto } from "../../inventory/dtos";
 
 export class item{
@@ -23,4 +23,18 @@ export class createOrderDto{
     @Min(0,{message:"El precio no puede ser inferior a 0"})
     @IsNotEmpty({message:"Debes enviar el precio total de la compra"})
     price: number;
+}
+
+export class Dates{
+    @IsDateString()
+    end: Date;
+    @IsDateString()
+    start: Date;
+}
+
+export class reportDTO{
+    @IsNumber()
+    @Min(0,{message:"El precio no puede ser inferior a 0"})
+    @IsNotEmpty({message:"Debes enviar el precio total de la compra"})
+    id: number;
 }

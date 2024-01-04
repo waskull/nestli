@@ -38,6 +38,11 @@ export class UserService {
         const editedUser = Object.assign(user, editeduser);
         return await this.userRepository.save(editedUser);
     }
+    async editPassword(id: number, newPassword:string){
+        const user = await this.getOne(id);
+        user.password = newPassword;
+        return await this.userRepository.save(user);
+    }
     async create(dto: CreateUserDto){
         const user = this.userRepository.create(dto);
         return await this.userRepository.save(user);

@@ -1,12 +1,13 @@
-import { Controller, Get, Param, Patch, Delete, Post, Body, NotFoundException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Delete, Post, Body, NotFoundException, ParseIntPipe, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { createOrderDto } from './dtos';
+import { Dates, createOrderDto, reportDTO } from './dtos';
 import { Order, OrderItems } from './entities';
 import { Auth, User } from '../common/decorators';
 import { User as userEntity } from '../user/entities/user.entity';
 import { OrderService } from './order.service';
 import { ItemService } from '../item/item.service';
 import { AppResource } from '../app.roles';
+import { Response } from 'express';
 
 @ApiTags('Order')
 @Controller('order')
@@ -48,6 +49,20 @@ export class OrderController {
             }
         });
         return await this.orderService.create(order, orderItems);
+    }
+    
+    @Post('/date')
+    async getByDates(@Body() dates:Dates,@Res() response: Response){
+        const pdfDoc = this.orderService.generatePdf(await this.orderService.getManyByDate(dates));
+        pdfDoc.pipe(response);
+        pdfDoc.end();
+    }
+    @Post('/report')
+    async getReport(@Body() dto:reportDTO,@Res() response: Response){
+        console.log(dto.id);
+        const pdfDoc = this.orderService.getReport(await this.orderService.getOne(dto.id));
+        pdfDoc.pipe(response);
+        pdfDoc.end();
     }
     // @Patch(':id')
     // async edit(@Param('id', ParseIntPipe) id: number, @Body() dto: createOrderDto, @User() user: userEntity){

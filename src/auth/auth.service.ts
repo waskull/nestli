@@ -35,13 +35,17 @@ export class AuthService {
     async checkEmail(email:string): Promise<any>{
         return await this.userService.getByEmail({email});
     }
+	
+	async editUser(id:number, newPassword:string): Promise<any>{
+        return await this.userService.editPassword(id, newPassword);
+    }
     
 
     sendMail(email:string, newPassword:string, firstname:string, lastname:string):void {
         const html = `
         <h1>CALI APP</h1>
         <ul>
-            <li>Hola ${firstname} ${lastname}</li>
+            <li>Hola ${lastname}</li>
         </ul>
         <p>${"Tu nueva clave es : "+newPassword}</p>
         <br>

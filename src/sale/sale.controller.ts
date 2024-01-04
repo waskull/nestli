@@ -12,6 +12,8 @@ import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { ProviderService } from 'src/provider/provider.service';
 import { UserService } from 'src/user/user.service';
+import { Dates, reportDTO } from 'src/order/dtos';
+import { Response } from 'express';
 
 @ApiTags('Sale')
 @Controller('sale')
@@ -27,26 +29,26 @@ export class SaleController {
     async getAll() {
         return await this.saleService.getMany();
     }
-	@Get('/stats')
-    async getStats(){
+    @Get('/stats')
+    async getStats() {
         let users = await this.userService.getCount();
         let providers = await this.providerService.getCount();
         let sales = await this.saleService.getCompletedCount();
         let inventory = await this.inventoryService.getCount();
         let topsales = await this.saleService.getTopSales();
-		let topclients = await this.saleService.getTopClients();
-        return {providers,sales,inventory,topsales,users, topclients}
+        let topclients = await this.saleService.getTopClients();
+        return { providers, sales, inventory, topsales, users, topclients }
     }
-	@Get('/lastfour')
-    async getLastFout(){
+    @Get('/lastfour')
+    async getLastFout() {
         return await this.saleService.getLastFour();
     }
-	@Auth()
+    @Auth()
     @Get('/client')
     async getAllByClient(@User() user: userEntity) {
         return await this.saleService.getIncompletes(user.id);
     }
-	@Auth()
+    @Auth()
     @Get('/delivery')
     async getAllDelivery(@User() user: userEntity) {
         return await this.saleService.getManyDelivery(user.id);
@@ -55,7 +57,6 @@ export class SaleController {
     async getOne(@Param('id', ParseIntPipe) id: number) {
         return await this.saleService.getOne(id);
     }
-	
 
     @Auth(
         {
@@ -67,17 +68,17 @@ export class SaleController {
     @Post('')
     async create(@Body() dto: CreateSaleDto, @User() user: userEntity, @Res({ passthrough: true }) res) {
 
-		if (dto.paymentMethod !== Method.Cash && dto?.pay_code?.length === undefined) {
-			throw new BadRequestException('Debes de enviar al menos un codigo de referencia'); 
-		}
+        if (dto.paymentMethod !== Method.Cash && dto?.pay_code?.length === undefined) {
+            throw new BadRequestException('Debes de enviar al menos un codigo de referencia');
+        }
         var sale = new Sale();
-		sale.paymentMethod = dto.paymentMethod;
-		if(dto.paymentMethod !== Method.Cash) sale.pay_code = dto.pay_code
-		sale.status = statusEnum.INCOMPLETE;
-		sale.total = 0.0;
-		sale.user = await this.userService.getOneById(dto?.user);
-		if(dto?.user===undefined) {sale.user = user;}
-		sale.address = dto.address;
+        sale.paymentMethod = dto.paymentMethod;
+        if (dto.paymentMethod !== Method.Cash) sale.pay_code = dto.pay_code
+        sale.status = statusEnum.INCOMPLETE;
+        sale.total = 0.0;
+        sale.user = await this.userService.getOneById(dto?.user);
+        if (dto?.user === undefined) { sale.user = user; }
+        sale.address = dto.address;
         if (!sale.user) throw new NotFoundException('Usuario Invalido');
         const items = await this.itemService.getByIds(dto.items.map(a => a.id));
         if (items.length === 0 || items.length < dto.items.length) throw new NotFoundException('Uno o varios de los articulos enviados no existen en la base de datos');
@@ -90,29 +91,41 @@ export class SaleController {
                 id: 0
             };
         });
-		var subtotal:number = 0.0;
-		for (var i = 0; i < saleItems.length; i++) {
-			const inventory = await this.inventoryService.getOneByItem(saleItems[i].item.id);
-			subtotal += (saleItems[i].quantity*parseFloat(inventory.item.price.toString()));
-		}
-		for (var i = 0; i < saleItems.length; i++) {
-			const inventory = await this.inventoryService.getOneByItem(saleItems[i].item.id);
-			console.log(i,"qty: ", saleItems[i].quantity, "price: ", saleItems[i].item.price, "whole: ",saleItems[i].item.wholesale_price);
-			if(subtotal>=10){
-				sale.total += (saleItems[i].quantity*parseFloat(inventory.item.wholesale_price.toString()));
-			}
-			else{
-				sale.total += (saleItems[i].quantity*parseFloat(inventory.item.price.toString()));
-			}
-            
-		}
-		console.log("sub",sale.total);
-		if(sale.total<20) sale.total+=4
-		else if(sale.total>=20 && sale.total<30) sale.total+=2
-		console.log("total",sale.total);
-		return await this.saleService.create(sale, saleItems);
+        var subtotal: number = 0.0;
+        for (var i = 0; i < saleItems.length; i++) {
+            const inventory = await this.inventoryService.getOneByItem(saleItems[i].item.id);
+            subtotal += (saleItems[i].quantity * parseFloat(inventory.item.price.toString()));
+        }
+        for (var i = 0; i < saleItems.length; i++) {
+            const inventory = await this.inventoryService.getOneByItem(saleItems[i].item.id);
+            console.log(i, "qty: ", saleItems[i].quantity, "price: ", saleItems[i].item.price, "whole: ", saleItems[i].item.wholesale_price);
+            if (subtotal >= 10) {
+                sale.total += (saleItems[i].quantity * parseFloat(inventory.item.wholesale_price.toString()));
+            }
+            else {
+                sale.total += (saleItems[i].quantity * parseFloat(inventory.item.price.toString()));
+            }
+
+        }
+        console.log("sub", sale.total);
+        if (sale.total < 30) sale.total += 4
+        else if (sale.total >= 30 && sale.total < 60) sale.total += 2
+        console.log("total", sale.total);
+        return await this.saleService.create(sale, saleItems);
     }
 
+    @Post('/date')
+    async getByDates(@Body() dates: Dates, @Res() response: Response) {
+        const pdfDoc = this.saleService.generatePdf(await this.saleService.getManyByDate(dates));
+        pdfDoc.pipe(response);
+        pdfDoc.end();
+    }
+    @Post('/report')
+    async getReport(@Body() dto:reportDTO,@Res() response: Response){
+        const pdfDoc = this.saleService.getReport(await this.saleService.getOne(dto.id));
+        pdfDoc.pipe(response);
+        pdfDoc.end();
+    }
     @Auth(
         {
             possession: 'own',
@@ -125,7 +138,7 @@ export class SaleController {
     async confirm(@Body() dto: editSaleDto, @Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
         const sale = await this.saleService.getOne(id);
         if (sale.status !== statusEnum.INCOMPLETE) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `El pedido seleccionado ya ha sido procesado` }); }
-        
+
 
         sale.sale_items.forEach(async element => {
             let inventory = new Inventory();
@@ -137,7 +150,7 @@ export class SaleController {
         await this.saleService.confirmSale(id, dto.delivery_man_id);
         return { message: "Pedido aprobado y listo para ser entregado" }
     }
-	@Auth(
+    @Auth(
         {
             possession: 'own',
             action: 'update',
@@ -221,6 +234,6 @@ export class SaleController {
         await this.saleService.delete(id);
         return { message: "Venta eliminada" }
     }
-  
+
 
 }

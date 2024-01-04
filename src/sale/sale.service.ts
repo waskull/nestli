@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Sale, SaleItems } from './entities/'
 import { statusEnum } from './enum';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Dates } from 'src/order/dtos';
+import PdfPrinter from 'pdfmake';
+import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { LOGO64 } from 'src/config/constants';
 
 @Injectable()
 export class SaleService {
@@ -16,8 +20,274 @@ export class SaleService {
     async getMany(): Promise<Sale[]> {
         return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user', 'delivery_man'], order: { createdAt: "DESC" } });
     }
+    async getManyByDate(dates: Dates): Promise<Sale[]> {
+        return await this.saleRepository.find({
+            relations: ['sale_items', 'sale_items.item', 'user'], where: [{
+                createdAt: Between(
+                    dates.start,
+                    dates.end
+                ),
+                status: statusEnum.WAITING,
+                
+            },{
+                    createdAt: Between(
+                        dates.start,
+                        dates.end
+                    ),
+                    status: statusEnum.COMPLETED
+                }
+            ]
+            
+        });
+    }
+
+    getReport(sale: Sale): PDFKit.PDFDocument{
+        console.log(sale.total);
+        var fonts = {
+            Roboto: {
+                normal: 'fonts/Roboto-Regular.ttf',
+                bold: 'fonts/Roboto-Medium.ttf',
+                italics: 'fonts/Roboto-Italic.ttf',
+                bolditalics: 'fonts/Roboto-MediumItalic.ttf'
+            }
+        };
+        let title = 'REPORTE DE VENTA';
+        const code = sale.id;
+        const printer = new PdfPrinter(fonts);
+        const docDefinition = {
+            header: '',
+            content: [
+                {
+                    image: LOGO64,
+                    width: 150,
+                    alignment: 'center'
+
+                },
+                {
+                    text: 'Helados Cali Maturin',
+                    fontSize: 16,
+                    alignment: 'center',
+                    margin: [0, 5, 0, 5],
+                    color: '#18609d'
+                },
+                {
+                    text: title,
+                    fontSize: 14,
+                    bold: true,
+                    alignment: 'center',
+                    decoration: 'underline',
+                    color: '#18409d'
+                },
+
+                {
+                    columns: [
+                        [
+                            {
+                                text: `Fecha: ${new Date(sale.createdAt).toLocaleDateString()}`,
+                                alignment: 'right'
+                            },
+                            {
+                                text: `Venta: #${code}`,
+                                alignment: 'right'
+                            },
+                            {
+                                text: `Estado: ${sale.status}`,
+                                alignment: 'left',
+                                bold: true,
+                                decoration: 'underline',
+                            }
+                        ]
+                    ]
+                },
+                {
+                    text: 'DETALLES DE LA VENTA',
+                    style: 'sectionHeader'
+                },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto'],
+                        body: [
+                            ['ID', 'Articulo','Precio', 'Cantidad','Monto', 'Cliente'],
+                            ...sale.sale_items.map(p => ([p?.id, p?.item.name, sale.total >= 10 ? p?.item.wholesale_price : p?.item?.price, p?.quantity, parseFloat(sale.total >= 10 ? (p?.item.wholesale_price*p?.quantity).toString() : (p?.item.price*p?.quantity).toString()).toFixed(2), `${sale?.user?.firstname} ${sale.user?.lastname}`])),
+                        ]
+                    },
+                },
+                [
+                    {
+                        text: 'Total:',
+                        bold: true,
+                        fontSize: 14,
+                        alignment: 'right',
+                        italics: true,
+                        border: [true, false, false, true],
+                        margin: [0, 5, 0, 5],
+                    },
+                    {
+                        text: sale.total,
+                        bold: true,
+                        fontSize: 14,
+                        alignment: 'right',
+                        border: [false, false, false, true],
+                        fillColor: '#f5f5f5',
+                        margin: [0, 0, 0, 5],
+                        decoration: 'underline'
+                    },
+                ],
+                {
+                    text: 'Notas',
+                    style: 'sectionHeader'
+                },
+                {
+                    ul: [
+                        'Este es un reporte de venta generado por el sistema Cali Maturin.'
+                    ],
+                },
+            ],
+            styles: {
+                sectionHeader: {
+                    bold: true,
+                    decoration: 'underline',
+                    fontSize: 14,
+                    margin: [0, 15, 0, 15]
+                }
+            }
+
+        } as TDocumentDefinitions;
+        const options = {
+
+        }
+        return printer.createPdfKitDocument(docDefinition, options);
+    }
+    
+    generatePdf(sales: Sale[]): PDFKit.PDFDocument {
+        var fonts = {
+            Roboto: {
+                normal: 'fonts/Roboto-Regular.ttf',
+                bold: 'fonts/Roboto-Medium.ttf',
+                italics: 'fonts/Roboto-Italic.ttf',
+                bolditalics: 'fonts/Roboto-MediumItalic.ttf'
+            }
+        };
+        let title = 'REPORTE DE VENTAS';
+        let total = 0;
+        const code = Math.random().toString(36).slice(2).toUpperCase();
+        const printer = new PdfPrinter(fonts);
+        var data: any[] = [];
+        sales.forEach(r => {
+            r.sale_items.forEach((res: any) => {
+                data.push({ id: r.id, 
+                    item: res.item, 
+                    quantity: res.quantity, 
+                    status: r.status, 
+                    total: r.total, 
+                    total_paid: r.total, 
+                    salesman: r?.delivery_man, 
+                    user: r?.user });
+            });
+        });
+        total = data.reduce((sum: number, p: { quantity: number; item: { price: string; } }) => sum + (p.quantity * parseFloat(p.item.price)), 0).toFixed(2);
+        const docDefinition = {
+            header: '',
+            content: [
+                {
+                    image: LOGO64,
+                    width: 150,
+                    alignment: 'center'
+
+                },
+                {
+                    text: 'Helados Cali Maturin',
+                    fontSize: 16,
+                    alignment: 'center',
+                    margin: [0, 5, 0, 5],
+                    color: '#18609d'
+                },
+                {
+                    text: title,
+                    fontSize: 14,
+                    bold: true,
+                    alignment: 'center',
+                    decoration: 'underline',
+                    color: '#18409d'
+                },
+
+                {
+                    columns: [
+                        [
+                            {
+                                text: `Fecha: ${new Date().toLocaleDateString()}`,
+                                alignment: 'right'
+                            },
+                            {
+                                text: `Reporte: ${code}`,
+                                alignment: 'right'
+                            }
+                        ]
+                    ]
+                },
+                {
+                    text: 'DETALLES DE LAS VENTAS',
+                    style: 'sectionHeader'
+                },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto'],
+                        body: [
+                            ['ID', 'Articulo', 'Precio', 'Cantidad', 'Monto', 'Cliente'],
+                            ...data.map(p => ([p?.id, p?.item.name, parseFloat(p?.item?.price), p?.quantity, (parseFloat(p?.item?.price) * p?.quantity).toFixed(2), `${p?.user?.firstname} ${p?.user?.lastname}`])),
+                        ]
+                    },
+                },
+                [
+                    {
+                        text: 'Total:',
+                        bold: true,
+                        fontSize: 14,
+                        alignment: 'right',
+                        italics: true,
+                        border: [true, false, false, true],
+                        margin: [0, 5, 0, 5],
+                    },
+                    {
+                        text: total,
+                        bold: true,
+                        fontSize: 14,
+                        alignment: 'right',
+                        border: [false, false, false, true],
+                        fillColor: '#f5f5f5',
+                        margin: [0, 0, 0, 5],
+                        decoration: 'underline'
+                    },
+                ],
+                {
+                    text: 'Notas',
+                    style: 'sectionHeader'
+                },
+                {
+                    ul: [
+                        'Esto es un reporte de ventas generado por el sistema Cali Maturin.'
+                    ],
+                },
+            ],
+            styles: {
+                sectionHeader: {
+                    bold: true,
+                    decoration: 'underline',
+                    fontSize: 14,
+                    margin: [0, 15, 0, 15]
+                }
+            }
+
+        } as TDocumentDefinitions;
+        const options = {
+
+        }
+        return printer.createPdfKitDocument(docDefinition, options);
+    }
     async getManyDelivery(delivery_man: number): Promise<Sale[]> {
-        return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item','user'], where: { delivery_man:{id:delivery_man}, status: statusEnum.WAITING }, order: { updateAt: "DESC" } });
+        return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], where: { delivery_man: { id: delivery_man }, status: statusEnum.WAITING }, order: { updateAt: "DESC" } });
     }
     async getLastFour(): Promise<Sale[]> {
         return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], order: { createdAt: "DESC" }, take: 4 });
@@ -36,7 +306,7 @@ export class SaleService {
     async getIncompletes(client_id: number): Promise<Sale[]> {
         const sale = await this.saleRepository.find({
             relations: ['sale_items', 'sale_items.item'], where: {
-                user: {id:client_id}
+                user: { id: client_id }
 
             },
             order: { createdAt: "DESC" }
@@ -71,11 +341,11 @@ export class SaleService {
         const sale = await this.getOne(id);
         return await this.saleRepository.save({
             id: sale.id,
-            delivery_man: {id: delivery_man},
+            delivery_man: { id: delivery_man },
             status: statusEnum.WAITING
         });
     }
-	async completeSaleById(id: number) {
+    async completeSaleById(id: number) {
         const sale = await this.getOne(id);
         return await this.saleRepository.save({
             id: sale.id,
@@ -107,7 +377,7 @@ export class SaleService {
     async create(sale: Sale, newItems: SaleItems[]) {
 
         const newSale = this.saleRepository.create({
-            user: {id:sale.user.id},
+            user: { id: sale.user.id },
             status: sale.status,
             paymentMethod: sale.paymentMethod,
             pay_code: sale.pay_code,
@@ -132,7 +402,7 @@ export class SaleService {
         return this.saleRepository.delete(id);
     }
 
-
+    
 
 }
 
