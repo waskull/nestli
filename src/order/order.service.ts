@@ -79,7 +79,7 @@ export class OrderService {
                     columns: [
                         [
                             {
-                                text: `Fecha: ${new Date(order.createdAt).toLocaleDateString()}`,
+                                text: `Fecha: ${new Date(order.createdAt).toLocaleDateString("es-VE", { day: "2-digit", month: "2-digit", year: "numeric"})}`,
                                 alignment: 'right'
                             },
                             {
@@ -214,7 +214,7 @@ export class OrderService {
                     columns: [
                         [
                             {
-                                text: `Fecha: ${new Date().toLocaleDateString()}`,
+                                text: `Fecha: ${new Date().toLocaleDateString("es-VE", { day: "2-digit", month: "2-digit", year: "numeric"})}`,
                                 alignment: 'right'
                             },
                             {

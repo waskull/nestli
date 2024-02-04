@@ -13,7 +13,7 @@ export class ItemService {
         @InjectRepository(Inventory)
         private readonly inventoryRepository: Repository<Inventory>){}
     async getMany(): Promise<Item[]>{
-        return await this.itemRepository.find();
+        return await this.itemRepository.find({relations:["inventory"]});
     }
     async getOne(id: number): Promise<Item>{
         const item = await this.itemRepository.findOne({where:{id:id}})

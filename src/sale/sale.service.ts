@@ -83,12 +83,45 @@ export class SaleService {
                     columns: [
                         [
                             {
-                                text: `Fecha: ${new Date(sale.createdAt).toLocaleDateString()}`,
+                                text: `Fecha de solicitud: ${new Date(sale.createdAt).toLocaleDateString("es-VE", { day: "2-digit", month: "2-digit", year: "numeric"})}`,
                                 alignment: 'right'
                             },
                             {
                                 text: `Venta: #${code}`,
                                 alignment: 'right'
+                            },
+							{
+                                text: `Cliente: ${sale?.user?.firstname} ${sale.user?.lastname}`,
+                                alignment: 'left',
+                                bold: false,
+                            },
+							{
+                                text: `Cedula: ${sale?.user?.cedula}`,
+                                alignment: 'left',
+                                bold: false,
+                            },
+							
+							{
+                                text: `Telefono: ${sale?.user?.phone}`,
+                                alignment: 'left',
+                                bold: false,
+                            },
+							
+							{
+                                text: `Correo: ${sale?.user?.email}`,
+                                alignment: 'left',
+                                bold: false,
+                            },
+							{
+                                text: `Metodo de pago: ${sale?.paymentMethod}`,
+                                alignment: 'left',
+                                bold: false,
+                            },
+							
+							{
+                                text: `Direccion: ${sale?.address}`,
+                                alignment: 'left',
+                                bold: false,
                             },
                             {
                                 text: `Estado: ${sale.status}`,
@@ -106,10 +139,10 @@ export class SaleService {
                 {
                     table: {
                         headerRows: 1,
-                        widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto'],
+                        widths: ['auto', '*', 'auto', 'auto', 'auto'],
                         body: [
-                            ['ID', 'Articulo','Precio', 'Cantidad','Monto', 'Cliente'],
-                            ...sale.sale_items.map(p => ([p?.id, p?.item.name, sale.total >= 10 ? p?.item.wholesale_price : p?.item?.price, p?.quantity, parseFloat(sale.total >= 10 ? (p?.item.wholesale_price*p?.quantity).toString() : (p?.item.price*p?.quantity).toString()).toFixed(2), `${sale?.user?.firstname} ${sale.user?.lastname}`])),
+                            ['ID', 'Articulo','Precio', 'Cantidad','Monto'],
+                            ...sale.sale_items.map(p => ([p?.id, p?.item.name, sale.total >= 10 ? p?.item.wholesale_price : p?.item?.price, p?.quantity, parseFloat(sale.total >= 10 ? (p?.item.wholesale_price*p?.quantity).toString() : (p?.item.price*p?.quantity).toString()).toFixed(2)])),
                         ]
                     },
                 },
@@ -216,7 +249,7 @@ export class SaleService {
                     columns: [
                         [
                             {
-                                text: `Fecha: ${new Date().toLocaleDateString()}`,
+                                text: `Fecha: ${new Date().toLocaleDateString("es-VE", { day: "2-digit", month: "2-digit", year: "numeric"})}`,
                                 alignment: 'right'
                             },
                             {
@@ -321,6 +354,12 @@ export class SaleService {
     }
     async getCompletedCount(): Promise<number> {
         const sale = await this.saleRepository.find({ where: { status: statusEnum.COMPLETED } })
+        if (!sale) return 0;
+        return sale.length;
+    }
+	
+	async getIncompletesCount(): Promise<number> {
+        const sale = await this.saleRepository.find({ where: { status: statusEnum.INCOMPLETE } })
         if (!sale) return 0;
         return sale.length;
     }

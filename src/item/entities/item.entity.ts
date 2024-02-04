@@ -29,7 +29,7 @@ export class Item{
     @Column({type: 'decimal',precision:11, scale:2, default:0.10, nullable: false})
     wholesale_price:number;
 
-    @OneToOne(() => Inventory)
+    @OneToOne(type => Inventory, inventory => inventory.item)
     inventory: Inventory;
 
     @OneToMany(type => OrderItems, (order_items) => order_items.item)

@@ -32,12 +32,12 @@ export class SaleController {
     @Get('/stats')
     async getStats() {
         let users = await this.userService.getCount();
-        let providers = await this.providerService.getCount();
         let sales = await this.saleService.getCompletedCount();
+		let incompletes = await this.saleService.getIncompletesCount();
         let inventory = await this.inventoryService.getCount();
         let topsales = await this.saleService.getTopSales();
         let topclients = await this.saleService.getTopClients();
-        return { providers, sales, inventory, topsales, users, topclients }
+        return { incompletes, sales, inventory, topsales, users, topclients }
     }
     @Get('/lastfour')
     async getLastFout() {
