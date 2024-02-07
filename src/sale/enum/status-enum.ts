@@ -1,6 +1,6 @@
 export enum statusEnum{
     WAITING = "Esperando Entrega",
-    INCOMPLETE = "Esperando confirmacion de pago",
+    INCOMPLETE = "Esperando confirmación de pago",
     COMPLETED = "Producto entregado",
     CANCELED = "Pedido cancelado por el usuario",
     CANCELED_SYSTEM = "Pedido cancelado por el sistema"
@@ -8,6 +8,6 @@ export enum statusEnum{
 
 export enum Method{
     Cash = "Efectivo",
-    Mobile = "Pago Movil",
+    Mobile = "Pago Móvil",
     Transfer = "Transferencia"
 }

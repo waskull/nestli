@@ -60,13 +60,6 @@ export class OrderService {
 
                 },
                 {
-                    text: 'Helados Cali Maturin',
-                    fontSize: 16,
-                    alignment: 'center',
-                    margin: [0, 5, 0, 5],
-                    color: '#18609d'
-                },
-                {
                     text: title,
                     fontSize: 14,
                     bold: true,
@@ -95,7 +88,7 @@ export class OrderService {
                     ]
                 },
                 {
-                    text: 'DETALLES DE LAS COMPRA',
+                    text: 'DETALLES DE LAS COMPRAS',
                     style: 'sectionHeader'
                 },
                 {
@@ -103,7 +96,7 @@ export class OrderService {
                         headerRows: 1,
                         widths: ['auto', '*', 'auto'],
                         body: [
-                            ['ID', 'Articulo', 'Cantidad'],
+                            ['ID', 'Artículo', 'Cantidad'],
                             ...order.order_items.map(p => ([p?.id, p?.item.name, p?.quantity])),
                         ]
                     },
@@ -195,13 +188,6 @@ export class OrderService {
 
                 },
                 {
-                    text: 'Helados Cali Maturin',
-                    fontSize: 16,
-                    alignment: 'center',
-                    color: '#18609d;',
-                    margin: [0, 5, 0, 5],
-                },
-                {
                     text: title,
                     fontSize: 14,
                     bold: true,
@@ -233,7 +219,7 @@ export class OrderService {
                         headerRows: 1,
                         widths: ['auto', '*', 'auto', 'auto'],
                         body: [
-                            ['ID', 'Articulos', 'Precio', 'Solicitado Por'],
+                            ['ID', 'Artículos', 'Precio', 'Solicitado Por'],
                             ...data.map((p: { item: string; id: number; price: string; bought_by: { firstname: string; lastname: string } }) => ([p.id, p.item, p.price, `${p.bought_by.firstname} ${p.bought_by.lastname}`])),
                         ]
                     },

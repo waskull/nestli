@@ -51,7 +51,7 @@ export class SaleService {
                 bolditalics: 'fonts/Roboto-MediumItalic.ttf'
             }
         };
-        let title = 'REPORTE DE VENTA';
+        let title = 'REPORTE DE PEDIDO';
         const code = sale.id;
         const printer = new PdfPrinter(fonts);
         const docDefinition = {
@@ -62,13 +62,6 @@ export class SaleService {
                     width: 150,
                     alignment: 'center'
 
-                },
-                {
-                    text: 'Helados Cali Maturin',
-                    fontSize: 16,
-                    alignment: 'center',
-                    margin: [0, 5, 0, 5],
-                    color: '#18609d'
                 },
                 {
                     text: title,
@@ -87,39 +80,39 @@ export class SaleService {
                                 alignment: 'right'
                             },
                             {
-                                text: `Venta: #${code}`,
+                                text: `Pedido: #${code}`,
                                 alignment: 'right'
                             },
 							{
-                                text: `Cliente: ${sale?.user?.firstname} ${sale.user?.lastname}`,
+                                text: sale?.user?.firstname ? `Cliente: ${sale?.user?.firstname} ${sale.user?.lastname}` : 'Cliente: ',
                                 alignment: 'left',
                                 bold: false,
                             },
 							{
-                                text: `Cedula: ${sale?.user?.cedula}`,
-                                alignment: 'left',
-                                bold: false,
-                            },
-							
-							{
-                                text: `Telefono: ${sale?.user?.phone}`,
+                                text: sale?.user?.cedula ? `Cédula: ${sale?.user?.cedula}`: 'Cédula: ',
                                 alignment: 'left',
                                 bold: false,
                             },
 							
 							{
-                                text: `Correo: ${sale?.user?.email}`,
-                                alignment: 'left',
-                                bold: false,
-                            },
-							{
-                                text: `Metodo de pago: ${sale?.paymentMethod}`,
+                                text: sale?.user?.phone ? `Teléfono: ${sale?.user?.phone}`: 'Teléfono: ',
                                 alignment: 'left',
                                 bold: false,
                             },
 							
 							{
-                                text: `Direccion: ${sale?.address}`,
+                                text: sale?.user?.email ? `Correo: ${sale?.user?.email}`: 'Correo: ',
+                                alignment: 'left',
+                                bold: false,
+                            },
+							{
+                                text: `Método de pago: ${sale?.paymentMethod}`,
+                                alignment: 'left',
+                                bold: false,
+                            },
+							
+							{
+                                text: `Dirección: ${sale?.address}`,
                                 alignment: 'left',
                                 bold: false,
                             },
@@ -133,7 +126,7 @@ export class SaleService {
                     ]
                 },
                 {
-                    text: 'DETALLES DE LA VENTA',
+                    text: 'DETALLES DEL PEDIDO',
                     style: 'sectionHeader'
                 },
                 {
@@ -141,7 +134,7 @@ export class SaleService {
                         headerRows: 1,
                         widths: ['auto', '*', 'auto', 'auto', 'auto'],
                         body: [
-                            ['ID', 'Articulo','Precio', 'Cantidad','Monto'],
+                            ['ID', 'Artículo','Precio', 'Cantidad','Monto'],
                             ...sale.sale_items.map(p => ([p?.id, p?.item.name, sale.total >= 10 ? p?.item.wholesale_price : p?.item?.price, p?.quantity, parseFloat(sale.total >= 10 ? (p?.item.wholesale_price*p?.quantity).toString() : (p?.item.price*p?.quantity).toString()).toFixed(2)])),
                         ]
                     },
@@ -173,7 +166,7 @@ export class SaleService {
                 },
                 {
                     ul: [
-                        'Este es un reporte de venta generado por el sistema Cali Maturin.'
+                        'Este es un reporte de pedido generado por el sistema Cali Maturín.'
                     ],
                 },
             ],
@@ -202,7 +195,7 @@ export class SaleService {
                 bolditalics: 'fonts/Roboto-MediumItalic.ttf'
             }
         };
-        let title = 'REPORTE DE VENTAS';
+        let title = 'REPORTE DE PEDIDOS';
         let total = 0;
         const code = Math.random().toString(36).slice(2).toUpperCase();
         const printer = new PdfPrinter(fonts);
@@ -230,13 +223,6 @@ export class SaleService {
 
                 },
                 {
-                    text: 'Helados Cali Maturin',
-                    fontSize: 16,
-                    alignment: 'center',
-                    margin: [0, 5, 0, 5],
-                    color: '#18609d'
-                },
-                {
                     text: title,
                     fontSize: 14,
                     bold: true,
@@ -260,7 +246,7 @@ export class SaleService {
                     ]
                 },
                 {
-                    text: 'DETALLES DE LAS VENTAS',
+                    text: 'DETALLES DEL PEDIDOS',
                     style: 'sectionHeader'
                 },
                 {
@@ -268,7 +254,7 @@ export class SaleService {
                         headerRows: 1,
                         widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto'],
                         body: [
-                            ['ID', 'Articulo', 'Precio', 'Cantidad', 'Monto', 'Cliente'],
+                            ['ID', 'Artículo', 'Precio', 'Cantidad', 'Monto', 'Cliente'],
                             ...data.map(p => ([p?.id, p?.item.name, parseFloat(p?.item?.price), p?.quantity, (parseFloat(p?.item?.price) * p?.quantity).toFixed(2), `${p?.user?.firstname} ${p?.user?.lastname}`])),
                         ]
                     },
@@ -300,7 +286,7 @@ export class SaleService {
                 },
                 {
                     ul: [
-                        'Esto es un reporte de ventas generado por el sistema Cali Maturin.'
+                        'Esto es un reporte de pedidos generado por el sistema Cali Maturín.'
                     ],
                 },
             ],
@@ -327,7 +313,7 @@ export class SaleService {
     }
     async getOne(id: number): Promise<Sale> {
         const sale = await this.saleRepository.findOne({ relations: ['sale_items', 'sale_items.item', 'user'], where: { id: id } })
-        if (!sale) throw new NotFoundException('La venta no existe');
+        if (!sale) throw new NotFoundException('El pedido no existe');
         return sale;
     }
     async getTopSales(): Promise<Sale[]> {
@@ -344,12 +330,12 @@ export class SaleService {
             },
             order: { createdAt: "DESC" }
         })
-        if (!sale) throw new NotFoundException('La venta no existe');
+        if (!sale) throw new NotFoundException('El pedido no existe');
         return sale;
     }
     async getWaiting(user: number): Promise<Sale[]> {
         const sale = await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], where: { status: statusEnum.WAITING } })
-        if (!sale) throw new NotFoundException('La venta no existe');
+        if (!sale) throw new NotFoundException('El pedido no existe');
         return sale;
     }
     async getCompletedCount(): Promise<number> {
