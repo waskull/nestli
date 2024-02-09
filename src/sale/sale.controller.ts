@@ -8,11 +8,11 @@ import { SaleService } from './sale.service';
 import { ItemService } from '../item/item.service';
 import { AppResource } from 'src/app.roles';
 import { statusEnum, Method } from './enum';
-import { Inventory } from 'src/inventory/entities/inventory.entity';
-import { InventoryService } from 'src/inventory/inventory.service';
-import { ProviderService } from 'src/provider/provider.service';
-import { UserService } from 'src/user/user.service';
-import { Dates, reportDTO } from 'src/order/dtos';
+import { Inventory } from '../inventory/entities/inventory.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { ProviderService } from '../provider/provider.service';
+import { UserService } from '../user/user.service';
+import { Dates, reportDTO } from '../order/dtos';
 import { Response } from 'express';
 
 @ApiTags('Sale')
@@ -107,10 +107,9 @@ export class SaleController {
             }
 
         }
-        console.log("sub", sale.total);
+        
         if (sale.total < 30) sale.total += 4
         else if (sale.total >= 30 && sale.total < 60) sale.total += 2
-        console.log("total", sale.total);
         return await this.saleService.create(sale, saleItems);
     }
 
@@ -232,7 +231,7 @@ export class SaleController {
         const sale = await this.saleService.getOne(id);
         if (sale.status !== statusEnum.INCOMPLETE) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `Este pedido ya no puede ser cancelado` }); }
         await this.saleService.delete(id);
-        return { message: "Venta eliminada" }
+        return { message: "Pedido eliminado" }
     }
 
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Delete, Post, Body, NotFoundException, ParseIntPipe, Res } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Delete, Post, Body, NotFoundException, ParseIntPipe, Res, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Dates, createOrderDto, reportDTO } from './dtos';
 import { Order, OrderItems } from './entities';
@@ -8,6 +8,8 @@ import { OrderService } from './order.service';
 import { ItemService } from '../item/item.service';
 import { AppResource } from '../app.roles';
 import { Response } from 'express';
+import { InventoryService } from '../inventory/inventory.service';
+import { Inventory } from '../inventory/entities/inventory.entity';
 
 @ApiTags('Order')
 @Controller('order')
@@ -15,6 +17,7 @@ export class OrderController {
     constructor(
         private orderService: OrderService,
         private itemService: ItemService,
+        private inventoryService: InventoryService
     ){}
     @Get()
     async getAll(){
@@ -78,7 +81,16 @@ export class OrderController {
         }
     )
     @Delete(':id')
-    async delete(@Param('id', ParseIntPipe) id: number){
+    async delete(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res){
+        const order = await this.orderService.getOne(id);
+        
+        order.order_items.forEach(async element => {
+            let inventory = new Inventory();
+            inventory = await this.inventoryService.getOneByItem(element.item.id);
+            if (inventory.stock-element.quantity <= 0) inventory.stock = 0;
+            else inventory.stock -= element.quantity;
+            this.inventoryService.reduceInventory(inventory);
+        });
         await this.orderService.delete(id);
         return {message:"Compra eliminada"}
     }

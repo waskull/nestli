@@ -20,7 +20,7 @@ export class OrderService {
         private readonly inventoryRepository: Repository<Inventory>
     ) { }
     async getMany(): Promise<Order[]> {
-        return await this.orderRepository.find({ relations: ['order_items', 'order_items.item', 'bought_by'] });
+        return await this.orderRepository.find({ relations: ['order_items', 'order_items.item', 'bought_by'], order: { createdAt: "DESC" } });
     }
     async getOne(id: number): Promise<Order> {
         const route = await this.orderRepository.findOne({ relations: ['order_items', 'order_items.item', 'bought_by'], where: { id: id } })
@@ -302,7 +302,8 @@ export class OrderService {
         return savedOrder;
     }
     async delete(id: number) {
-        const order = await this.getOne(id)
+        const order = await this.getOne(id);
+        await this.orderitemsRepository.delete({order_id:id});
         return await this.orderRepository.delete(id)
     }
 
