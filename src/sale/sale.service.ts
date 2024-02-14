@@ -4,10 +4,10 @@ import { Between, In, Repository } from 'typeorm';
 import { Sale, SaleItems } from './entities/'
 import { statusEnum } from './enum';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Dates } from 'src/order/dtos';
+import { Dates } from '../order/dtos';
 import PdfPrinter from 'pdfmake';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { LOGO64 } from 'src/config/constants';
+import { LOGO64 } from '../config/constants';
 
 @Injectable()
 export class SaleService {

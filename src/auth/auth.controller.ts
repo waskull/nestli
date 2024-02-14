@@ -54,10 +54,11 @@ export class AuthController {
     @Post('/resetpassword')
     async send(@Body() ResetDTO: ResetDTO, @Res({ passthrough: true }) res){
         const result = await this.authService.checkEmail(ResetDTO.email);
-        if(result.roles?.includes('admin')){
+        console.log(result);
+        if (result === null) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `Este correo no existe` }); }
+        if(result?.roles?.includes('admin')){
             return res.status(HttpStatus.BAD_REQUEST).json({ message: `La clave de administrador solo puede ser recuperada por un administrador` });
         }
-        if (!result) { return res.status(HttpStatus.BAD_REQUEST).json({ message: `Este correo no existe` }); }
         else{
 			console.log(result);
             const newPassword = Math.random().toString(36).substring(2,10);

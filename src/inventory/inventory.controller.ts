@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Patch, Delete, Post, Body, BadRequestException, ParseIntPipe } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AppResource } from 'src/app.roles';
-import { Auth } from 'src/common/decorators';
+import { AppResource } from '../app.roles';
+import { Auth } from '../common/decorators';
 import { CreateInventoryDto, EditInventoryDto } from './dtos';
 import { InventoryService } from './inventory.service';
 

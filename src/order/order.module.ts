@@ -7,7 +7,7 @@ import { Order } from './entities';
 import { OrderItems } from './entities/';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
-import { InventoryService } from 'src/inventory/inventory.service';
+import { InventoryService } from '../inventory/inventory.service';
 
 @Module({
   imports:[

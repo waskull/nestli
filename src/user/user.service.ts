@@ -54,7 +54,8 @@ export class UserService {
         return await this.userRepository.createQueryBuilder('user').where({email:data.email}).addSelect('user.password').getOne();
     }
     async getByEmail(data:UserFindOne){
-        return await this.userRepository.createQueryBuilder('user').where({email:data.email}).addSelect('user.firstname', 'user.lastname').getOne();
+        return await this.userRepository.findOne({where:{email:data.email}})
+        //return await this.userRepository.createQueryBuilder('user').where({email:data.email}).addSelect('user.firstname', 'user.lastname').getOne();
     }
     async getCount(): Promise<number>{
         const T:User[] = await this.userRepository.find({where:{

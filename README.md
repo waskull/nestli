@@ -28,13 +28,3 @@ $ npm run start:dev
 # producción
 $ npm run start:prod
 ```
-
-## Pruebas
-
-```bash
-# unit tests
-$ npm run test
-
-# test coverage
-$ npm run test:cov
-```

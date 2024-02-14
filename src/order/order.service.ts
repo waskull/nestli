@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Inventory } from 'src/inventory/entities/inventory.entity';
-import { Item } from 'src/item/entities/item.entity';
+import { Inventory } from '../inventory/entities/inventory.entity';
+import { Item } from '../item/entities/item.entity';
 import { Between, In, Repository } from 'typeorm';
 import { Order, OrderItems } from './entities/'
 import { Dates } from './dtos';
 import PdfPrinter from 'pdfmake';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { LOGO64 } from 'src/config/constants';
+import { LOGO64 } from '../config/constants';
 
 @Injectable()
 export class OrderService {

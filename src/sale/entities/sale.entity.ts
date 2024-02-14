@@ -1,6 +1,5 @@
 import { User } from "../../user/entities/user.entity";
 import { Column, JoinColumn, CreateDateColumn, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinTable, UpdateDateColumn, OneToOne,  } from "typeorm";
-import { Provider } from "../../provider/entities/provider.entity";
 import { SaleItems } from "./sale_item.entity";
 import { statusEnum, Method } from '../enum/';
 

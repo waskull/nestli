@@ -8,7 +8,6 @@ import { AccessControlModule } from 'nest-access-control';
 import { AuthModule } from './auth/auth.module';
 import { roles } from './app.roles';
 import { UserModule } from './user/user.module';
-import { ProviderModule } from './provider/provider.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ItemModule } from './item/item.module';
 import { OrderModule } from './order/order.module';
@@ -55,7 +54,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     AuthModule,
     AccessControlModule.forRoles(roles),
     UserModule,
-    ProviderModule,
     ItemModule,
     InventoryModule,
     OrderModule,

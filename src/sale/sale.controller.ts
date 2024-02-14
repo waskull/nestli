@@ -6,11 +6,10 @@ import { Auth, User } from '../common/decorators';
 import { User as userEntity } from '../user/entities/user.entity';
 import { SaleService } from './sale.service';
 import { ItemService } from '../item/item.service';
-import { AppResource } from 'src/app.roles';
+import { AppResource } from '../app.roles';
 import { statusEnum, Method } from './enum';
 import { Inventory } from '../inventory/entities/inventory.entity';
 import { InventoryService } from '../inventory/inventory.service';
-import { ProviderService } from '../provider/provider.service';
 import { UserService } from '../user/user.service';
 import { Dates, reportDTO } from '../order/dtos';
 import { Response } from 'express';
@@ -22,7 +21,6 @@ export class SaleController {
         private saleService: SaleService,
         private itemService: ItemService,
         private inventoryService: InventoryService,
-        private providerService: ProviderService,
         private userService: UserService,
     ) { }
     @Get()
