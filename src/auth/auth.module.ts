@@ -8,12 +8,15 @@ import { LocalStrategy, JwtStrategy } from './strategies/';
 import { JWT_KEY } from '../config/constants';
 import {ConfigService} from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PasswordRecovery } from './entities/password.entity';
 
 
 @Module({
   imports:[PassportModule.register({
     defaultStrategy:'jwt'
   }),
+  TypeOrmModule.forFeature([PasswordRecovery]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory:(config: ConfigService) =>({

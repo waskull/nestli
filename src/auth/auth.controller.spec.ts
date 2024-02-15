@@ -8,6 +8,7 @@ import { LocalAuthGuard } from './guards/';
 import { AppModule } from '../app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
+import { PasswordRecovery } from './entities/password.entity';
 
 
 describe('AuthController', () => {
@@ -17,11 +18,20 @@ describe('AuthController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService, UserService, JwtService,{provide: USER_REPOSITORY,useValue:{
-        findOne:jest.fn(),
-        save: jest.fn(),
-        create: jest.fn(),
-      }}],
+      providers: [AuthService, UserService, JwtService, {
+        provide: USER_REPOSITORY, useValue: {
+          findOne: jest.fn(),
+          save: jest.fn(),
+          create: jest.fn(),
+        }
+      },
+        {
+          provide: getRepositoryToken(PasswordRecovery), useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn(),
+          }
+        }],
       imports: [AppModule]
     }).compile();
     controller = module.get<AuthController>(AuthController);

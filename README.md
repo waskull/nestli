@@ -6,7 +6,7 @@
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
 
 
-## Description
+## Descrición
 
 Backend del sistema Helados CALI hecho con [Nest](https://github.com/nestjs/nest) 
 

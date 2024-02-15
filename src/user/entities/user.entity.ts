@@ -3,6 +3,7 @@ import { Rol } from "../enum";
 import { hash } from 'bcrypt'
 import { Sale } from "../../sale/entities";
 import { Order } from "../../order/entities";
+import { PasswordRecovery } from "../../auth/entities/password.entity";
 
 @Entity('user')
 export class User{
@@ -54,5 +55,7 @@ export class User{
     delivery_man: Sale[];
 	@OneToMany((type) => Sale, (sale) => sale.user)
     sales: Sale[];
+    @OneToMany((type) => PasswordRecovery, (passwordRecovery) => passwordRecovery.user)
+    resetCode: PasswordRecovery[];
     
 }

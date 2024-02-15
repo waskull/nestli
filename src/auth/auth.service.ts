@@ -4,11 +4,16 @@ import { compare } from 'bcrypt';
 import { User } from '../user/entities/user.entity'
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { PasswordRecovery } from './entities/password.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
     
     constructor(
+        @InjectRepository(PasswordRecovery)
+        private readonly passwordRecovery: Repository<PasswordRecovery>,
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
         private readonly mailerService: MailerService,
@@ -32,8 +37,21 @@ export class AuthService {
         }
     }
 
-    async checkEmail(email:string): Promise<any>{
+    async checkEmail(email:string): Promise<User>{
         return await this.userService.getByEmail({email});
+    }
+
+    async checkCode(code:string,id:number): Promise<PasswordRecovery>{
+        return await this.passwordRecovery.findOne({where: {code:code, user:{id:id}}, order: { createdAt: "DESC" }});
+    }
+
+    async createCode(passwordRecovery:{code:string, user_id:number}){
+        const newCode = await this.passwordRecovery.create({code:passwordRecovery.code, user:{id:passwordRecovery.user_id}});
+        return await this.passwordRecovery.save(newCode);
+    }
+
+    async disableCode(passwordRecovery:PasswordRecovery): Promise<PasswordRecovery>{
+        return await this.passwordRecovery.save(passwordRecovery);
     }
 	
 	async editUser(id:number, newPassword:string): Promise<any>{
@@ -45,11 +63,9 @@ export class AuthService {
         const html = `
         <h1>CALI APP</h1>
         <ul>
-            <li>Hola ${lastname}</li>
+            <li>Hola ${firstname} ${lastname}</li>
         </ul>
         <p>${"Tu nueva clave es : "+newPassword}</p>
-        <br>
-        <p>Recuerda que puedes cambiar esta clave desde nuestra app. </p>
         <br>
         <p>Helados CALI. </p>
     `;
@@ -57,7 +73,7 @@ export class AuthService {
             to: email,
             from: 'cali@gmail.com',
             subject: 'Reinicio de clave',
-            text:'D:',
+            text:'Helados CALI',
             html: html
         });
     }
