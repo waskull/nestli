@@ -59,13 +59,13 @@ export class AuthService {
     }
     
 
-    sendMail(email:string, newPassword:string, firstname:string, lastname:string):void {
+    async sendMail(email:string, newPassword:string, firstname:string, lastname:string):Promise<any> {
         const html = `
         <h1>CALI APP</h1>
         <ul>
             <li>Hola ${firstname} ${lastname}</li>
         </ul>
-        <p>${"Tu nueva clave es : "+newPassword}</p>
+        <p>${"Tu código de recuperación es : "+newPassword}</p>
         <br>
         <p>Helados CALI. </p>
     `;

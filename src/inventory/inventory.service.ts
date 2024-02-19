@@ -18,7 +18,9 @@ export class InventoryService {
         return await this.inventoryRepository.find({relations:['item']});
     }
 	async getManyWithoutStock(): Promise<any[]>{
-        const inventory = await this.inventoryRepository.find({relations:['item']});
+        const inventory = await this.inventoryRepository.find({relations:['item'], order: { item: {
+            name: "ASC"
+        } }});
 		const newInventory:any[] = [];
 		inventory.forEach(object => {
 		  let lowstock = false;

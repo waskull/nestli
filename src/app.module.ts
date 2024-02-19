@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_PORT, DATABASE_USERNAME } from './config/constants';
+import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_PORT, DATABASE_USERNAME, SMTP_PASSWORD, SMTP_USER } from './config/constants';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { AuthModule } from './auth/auth.module';
@@ -17,6 +17,13 @@ import { join } from 'path';
 
 import { MailerModule } from '@nestjs-modules/mailer';
 
+const localEmailConfig = {
+  transport: {
+    host: "localhost",
+    port: 1025,
+  },
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,11 +36,19 @@ import { MailerModule } from '@nestjs-modules/mailer';
         index: false,
       }
     }),
-    MailerModule.forRoot({
-      transport: {
-        host: "localhost",
-        port: 1025,
-      },
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: config.get<string>(SMTP_USER),
+            pass: config.get<string>(SMTP_PASSWORD),
+          }
+        }
+      })
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

@@ -63,7 +63,7 @@ export class AuthController {
         }
         const code = Math.random().toString(36).substring(2, 10);
         const data = await this.authService.createCode({ code: code, user_id: result.id });
-        this.authService.sendMail(ResetDTO.email, code, result.firstname, result.lastname); 
+        await this.authService.sendMail(ResetDTO.email, code, result.firstname, result.lastname); 
         return ({ message: `Una nueva clave fue enviada a tu correo electronico` });
 
     }
