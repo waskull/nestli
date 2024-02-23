@@ -18,9 +18,27 @@ export class SaleService {
         private readonly saleItemRepository: Repository<SaleItems>
     ) { }
     async getMany(): Promise<Sale[]> {
-        return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user', 'delivery_man'], order: { createdAt: "DESC" } });
+        const sales = await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item','sale_items.item.inventory', 'user', 'delivery_man'], order: { createdAt: "DESC" } });
+        let newSales:any[] = [];
+        sales.forEach(s => {
+            let lowstock:boolean = false;
+
+            s.sale_items.forEach(e => {
+                if (e.quantity > e.item.inventory.stock){
+                    lowstock = true;
+                }
+            });
+
+            newSales.push({
+                ...s,
+                lowstock:lowstock
+            });
+            lowstock = false;
+        });
+        return newSales;
     }
     async getManyByDate(dates: Dates): Promise<Sale[]> {
+        console.log("bydate");
         return await this.saleRepository.find({
             relations: ['sale_items', 'sale_items.item', 'user'], where: [{
                 createdAt: Between(
@@ -323,15 +341,31 @@ export class SaleService {
         return await this.saleItemRepository.query('select firstname,count(*) as sales from sale inner join user on user.id = sale.user where sale.status="Producto entregado" group by firstname order by sales desc limit 5; ;');
     }
     async getIncompletes(client_id: number): Promise<Sale[]> {
-        const sale = await this.saleRepository.find({
-            relations: ['sale_items', 'sale_items.item'], where: {
+        const sales = await this.saleRepository.find({
+            relations: ['sale_items', 'sale_items.item','sale_items.item.inventory'], where: {
                 user: { id: client_id }
 
             },
             order: { createdAt: "DESC" }
         })
-        if (!sale) throw new NotFoundException('El pedido no existe');
-        return sale;
+        if (!sales) throw new NotFoundException('El pedido no existe');
+        let newSales:any[] = [];
+        sales.forEach(s => {
+            let lowstock:boolean = false;
+
+            s.sale_items.forEach(e => {
+                if (e.quantity > e.item.inventory.stock){
+                    lowstock = true;
+                }
+            });
+
+            newSales.push({
+                ...s,
+                lowstock:lowstock
+            });
+            lowstock = false;
+        });
+        return newSales;
     }
     async getWaiting(user: number): Promise<Sale[]> {
         const sale = await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], where: { status: statusEnum.WAITING } })

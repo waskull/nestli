@@ -42,9 +42,8 @@ export class UserController {
         @User() userLogged: UserEntity
     ){
         let data;
-		console.log(dto);
-            data = await this.userService.edit(userLogged.id, dto, userLogged);
-            return {"Usuario: editado:": data}
+        data = await this.userService.edit(userLogged.id, dto, userLogged);
+        return {"Usuario: editado:": data}
     }
 
     @Get(':id')

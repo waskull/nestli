@@ -25,8 +25,8 @@ export class User{
     @Column({type: 'simple-array', nullable: false})
     roles: string[];
 
-    @Column({type: 'integer', nullable: false})
-    age: number;
+    @Column({type:'date', nullable: true})
+    birthdate: Date;
 
     @Column({type: 'varchar', length: 255, nullable: false})
     cedula: string;
