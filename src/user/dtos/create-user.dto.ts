@@ -19,7 +19,7 @@ export class CreateUserDto{
     lastname: string;
 
     @IsArray()
-    @IsEnum(AppRoles, {each: true, message: `Debes de escoger un rol valido entre: ${EnumToString(AppRoles)}`})
+    @IsEnum(AppRoles, {each: true, message: `Debes escoger un rol valido entre: ${EnumToString(AppRoles)}`})
     roles: string[];
 
     @IsString({message:'La cedula debe de ser una cadena de caracteres'})

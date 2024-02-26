@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, NotFoundException, Post, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpStatus, NotFoundException, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Auth, User } from '../common/decorators';
 import { User as UserEntity } from '../user/entities/user.entity';
@@ -59,7 +59,7 @@ export class AuthController {
         console.log(result);
         if (!result) throw new NotFoundException('El correo no existe');
         if (result?.roles?.includes('admin')) {
-            return res.status(HttpStatus.BAD_REQUEST).json({ message: `La clave de administrador solo puede ser recuperada por un administrador` });
+            throw new BadRequestException('La clave de administrador solo puede ser recuperada por un administrador');
         }
         const code = Math.random().toString(36).substring(2, 10);
         const data = await this.authService.createCode({ code: code, user_id: result.id });
@@ -73,21 +73,22 @@ export class AuthController {
         const result = await this.authService.checkEmail(PasswordDTO.email);
         if (!result) throw new NotFoundException('El correo no existe');
         if (result?.roles?.includes('admin')) {
-            return res.status(HttpStatus.BAD_REQUEST).json({ message: `La clave de administrador solo puede ser recuperada por un administrador` });
+            throw new BadRequestException('La clave de administrador solo puede ser recuperada por un administrador');
         }
         const code = await this.authService.checkCode(PasswordDTO.code, result.id); console.log("ASD: ", code);
-        console.log("antes");
+        
         if (!code) throw new NotFoundException('El codigo es inválido');
 
         if (code.code !== PasswordDTO.code) {
-            return res.status(HttpStatus.BAD_REQUEST).json({ message: `El codigo suministrado por la app Cali no concide con el codigo enviado a tu correo electronico` });
+            throw new BadRequestException('El codigo suministrado por la app Cali no concide con el codigo enviado a tu correo electronico');
         }
 
         //check date
         // let date = new Date();
         // date.setDate(date.getDate() + 24);
         if (code.IsInvalid === true) {
-            return res.status(HttpStatus.BAD_REQUEST).json({ message: `El codigo enviado ya expiro` });
+            
+            throw new BadRequestException('El codigo enviado ya expiro');
         }
         const data = await this.authService.editUser(result.id, PasswordDTO.password);
         code.IsInvalid = true;
