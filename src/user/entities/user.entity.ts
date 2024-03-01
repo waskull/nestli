@@ -28,7 +28,7 @@ export class User{
     @Column({type:'date', nullable: true})
     birthdate: Date;
 
-    @Column({type: 'varchar', length: 255, nullable: false})
+    @Column({type: 'varchar', length: 255, nullable: false, name:'dni'})
     cedula: string;
 
     @Column({type: 'varchar', length: 255, nullable: true})

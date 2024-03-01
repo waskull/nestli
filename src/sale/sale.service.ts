@@ -19,7 +19,7 @@ export class SaleService {
     ) { }
     async getMany(): Promise<Sale[]> {
         const sales = await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item','sale_items.item.inventory', 'user', 'delivery_man'], order: { createdAt: "DESC" } });
-        let newSales:any[] = [];
+        let newSales:any[] = []; 
         sales.forEach(s => {
             let lowstock:boolean = false;
 
@@ -324,7 +324,7 @@ export class SaleService {
         return printer.createPdfKitDocument(docDefinition, options);
     }
     async getManyDelivery(delivery_man: number): Promise<Sale[]> {
-        return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], where: { delivery_man: { id: delivery_man }, status: statusEnum.WAITING }, order: { updateAt: "DESC" } });
+        return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], where: { delivery_man: { id: delivery_man }, status: statusEnum.WAITING }, order: { createdAt: "ASC" } });
     }
     async getLastFour(): Promise<Sale[]> {
         return await this.saleRepository.find({ relations: ['sale_items', 'sale_items.item', 'user'], order: { createdAt: "DESC" }, take: 4 });
