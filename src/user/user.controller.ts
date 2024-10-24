@@ -2,7 +2,7 @@ import { Controller, Get, Param, Patch, Delete, Post, Body, ParseIntPipe, NotFou
 import { ApiTags } from '@nestjs/swagger';
 import { AppResource, AppRoles } from '../app.roles';
 import { Auth, User } from '../common/decorators';
-import { CreateUserDto, EditUserDto, UserRegistration, EditClientDTO, CreateUserDtoPass } from './dtos/';
+import { CreateUserDto, EditUserDto, UserRegistration, EditClientDTO } from './dtos/';
 import { User as UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 import { RolesBuilder, InjectRolesBuilder } from 'nest-access-control'
@@ -83,22 +83,6 @@ export class UserController {
     async edit(
         @Param('id', ParseIntPipe) id: number, 
         @Body() dto:CreateUserDto,
-        @User() userLogged: UserEntity
-    ){
-        let data;
-        if(this.rolesBuilder.can(userLogged.roles).updateAny(AppResource.USER).granted){
-            const result = await this.userService.edit(id, dto);
-            return {message: `Usuario editado`, data:result}
-        }else{
-            const { roles, ...rest } = dto;
-            data = await this.userService.edit(id, rest, userLogged);
-            return {message:'Usuario editado',data}
-        }
-    }
-    @Patch('/edit/:id')
-    async editUserWithoutPass(
-        @Param('id', ParseIntPipe) id: number, 
-        @Body() dto:CreateUserDtoPass,
         @User() userLogged: UserEntity
     ){
         let data;

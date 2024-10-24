@@ -150,10 +150,10 @@ export class SaleService {
                 {
                     table: {
                         headerRows: 1,
-                        widths: ['*', 'auto', 'auto', 'auto'],
+                        widths: ['auto', '*', 'auto', 'auto', 'auto'],
                         body: [
-                            ['Artículo','Precio', 'Cantidad','Monto'],
-                            ...sale.sale_items.map(p => ([p?.item.name, sale.total >= 10 ? p?.item.wholesale_price : p?.item?.price, p?.quantity, parseFloat(sale.total >= 10 ? (p?.item.wholesale_price*p?.quantity).toString() : (p?.item.price*p?.quantity).toString()).toFixed(2)])),
+                            ['ID', 'Artículo','Precio', 'Cantidad','Monto'],
+                            ...sale.sale_items.map(p => ([p?.id, p?.item.name, sale.total >= 10 ? p?.item.wholesale_price : p?.item?.price, p?.quantity, parseFloat(sale.total >= 10 ? (p?.item.wholesale_price*p?.quantity).toString() : (p?.item.price*p?.quantity).toString()).toFixed(2)])),
                         ]
                     },
                 },
@@ -338,7 +338,7 @@ export class SaleService {
         return await this.saleItemRepository.query('select name, sum(quantity) as sales from sale_items inner join item on sale_items.item_id = item.id  group by name order by sum(quantity) desc limit 5;');
     }
     async getTopClients(): Promise<Sale[]> {
-        return await this.saleItemRepository.query('select firstname,lastname,count(*) as sales from sale inner join user on user.id = sale.user where sale.status="Producto entregado" group by firstname order by sales desc limit 5; ;');
+        return await this.saleItemRepository.query('select firstname,count(*) as sales from sale inner join user on user.id = sale.user where sale.status="Producto entregado" group by firstname order by sales desc limit 5; ;');
     }
     async getIncompletes(client_id: number): Promise<Sale[]> {
         const sales = await this.saleRepository.find({
